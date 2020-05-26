@@ -12,6 +12,7 @@
   "dependencies": {},
   "devDependencies": {
     "@babylonjs/core": "^4.1.0",
+    "@babylonjs/loaders": "^4.1.0",
     "@babylonjs/materials": "^4.1.0",
     "copy-webpack-plugin": "^6.0.1",
     "css-loader": "^3.5.3",
