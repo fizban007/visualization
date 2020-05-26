@@ -9,6 +9,12 @@ var CopyPlugin = require('copy-webpack-plugin');
 module.exports = {
   mode: 'production',
 
+  performance: {
+    hints: false,
+    // maxEntrypointSize: 2000000,
+    // maxAssetSize: 10000000,
+  },
+
   // entry: {
   //   vis: './src/vis.ts',
   // },
@@ -50,12 +56,6 @@ module.exports = {
     ]
   },
 
-  performance: {
-    hints: false,
-    // maxEntrypointSize: 2000000,
-    // maxAssetSize: 10000000,
-  },
-
   devServer: {
     historyApiFallback: true,
     host: '0.0.0.0',
@@ -78,10 +78,10 @@ module.exports = {
 
     new CopyPlugin({
       patterns: [
-       {
-        from: 'src/index.html',
-        to: 'index.html'
-       },
+        {
+          from: 'src/index.html',
+          to: 'index.html'
+        },
       ],
     }),
   ]
