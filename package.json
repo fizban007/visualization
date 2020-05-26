@@ -1,0 +1,28 @@
+{
+  "name": "visualization",
+  "version": "0.0.1",
+  "description": "Visualizations of scientific data in modern web browsers",
+  "main": "index.js",
+  "scripts": {
+    "serve": "webpack-dev-server --content-base dist/",
+    "build": "webpack"
+  },
+  "author": "Alex Chen",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@babylonjs/core": "^4.1.0",
+    "@babylonjs/materials": "^4.1.0",
+    "copy-webpack-plugin": "^6.0.1",
+    "css-loader": "^3.5.3",
+    "file-loader": "^6.0.0",
+    "glslify-loader": "^2.0.0",
+    "raw-loader": "^4.0.1",
+    "style-loader": "^1.2.1",
+    "ts-loader": "^7.0.5",
+    "typescript": "^3.9.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
