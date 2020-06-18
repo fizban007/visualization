@@ -4,7 +4,8 @@
   "description": "Visualizations of scientific data in modern web browsers",
   "main": "index.js",
   "scripts": {
-    "serve": "webpack-dev-server --content-base dist/",
+    "dev": "watch 'npm run build' src",
+    "serve": "webpack-dev-server --content-base app/static/",
     "build": "webpack"
   },
   "author": "Alex Chen",
@@ -24,8 +25,10 @@
     "raw-loader": "^4.0.1",
     "stats.js": "^0.17.0",
     "style-loader": "^1.2.1",
+    "symlink-webpack-plugin": "^1.0.0",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.3",
+    "watch": "^1.0.2",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"
