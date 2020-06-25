@@ -16,7 +16,7 @@ module.exports = {
   },
 
   entry: {
-    fieldlines: "./src/index.ts"
+    fieldlines: "./src/fieldlines.ts"
   },
 
   output: {

@@ -137,14 +137,14 @@ function enable_lines(n: int, n_prev: int) {
     });
 }
 
-for (var n = 0; n < 6; n++) {
-    for (var j = n_init; j <= n_max; j++) {
-        var linetask = assetsManager.addBinaryFileTask("loadLine" + n + "_" + (j * 500),
-            "data/line_" + n + "_" + ("000000" + j * 500).slice(-6));
-        // linetask.onSuccess = create_lines(j, n, lines);
-        linetask.onSuccess = create_line_buffer(j, n, lines);
-    }
-}
+// for (var n = 0; n < 6; n++) {
+//     for (var j = n_init; j <= n_max; j++) {
+//         var linetask = assetsManager.addBinaryFileTask("loadLine" + n + "_" + (j * 500),
+//             "data/line_" + n + "_" + ("000000" + j * 500).slice(-6));
+//         // linetask.onSuccess = create_lines(j, n, lines);
+//         linetask.onSuccess = create_line_buffer(j, n, lines);
+//     }
+// }
 // function create_load_task(n: int, num_line: int) {
 //     var linetask = assetsManager.addBinaryFileTask("loadLine" + num_line + "_" + (n * 500),
 //         "data/line_" + num_line + "_" + ("000000" + n * 500).slice(-6));
@@ -178,39 +178,39 @@ function show_prev_frame() {
 }
 
 assetsManager.onFinish = function(tasks) {
-    update_lines(n_init);
-    var gl = new GlowLayer("glow", scene);
-    gl.intensity = 1.5;
-    gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
-        // lines.forEach((line_set) => {
-        //     line_set.forEach((line) => {
-        //         if (mesh == line) {
-        //             result.set(0, 1, 0, 0.5);
-        //         }
-        //     });
-        // });
-        if (mesh == line_meshes)
-            result.set(0, 1, 0, 0.5);
-        if (mesh == star)
-            result.set(0, 0, 0, 1);
-    }
+    // update_lines(n_init);
+    // var gl = new GlowLayer("glow", scene);
+    // gl.intensity = 1.5;
+    // gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
+    //     // lines.forEach((line_set) => {
+    //     //     line_set.forEach((line) => {
+    //     //         if (mesh == line) {
+    //     //             result.set(0, 1, 0, 0.5);
+    //     //         }
+    //     //     });
+    //     // });
+    //     if (mesh == line_meshes)
+    //         result.set(0, 1, 0, 0.5);
+    //     if (mesh == star)
+    //         result.set(0, 0, 0, 1);
+    // }
 
     var st = new Stats();
     st.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(st.dom);
 
     // Add keypress events
-    scene.onKeyboardObservable.add((kbInfo) => {
-        if (kbInfo.type == KeyboardEventTypes.KEYUP) {
-            if (kbInfo.event.key == "ArrowRight") {
-                show_next_frame();
-            } else if (kbInfo.event.key == "ArrowLeft") {
-                show_prev_frame();
-            } else if (kbInfo.event.key == " ") {
-                is_playing = !is_playing;
-            }
-        }
-    });
+    // scene.onKeyboardObservable.add((kbInfo) => {
+    //     if (kbInfo.type == KeyboardEventTypes.KEYUP) {
+    //         if (kbInfo.event.key == "ArrowRight") {
+    //             show_next_frame();
+    //         } else if (kbInfo.event.key == "ArrowLeft") {
+    //             show_prev_frame();
+    //         } else if (kbInfo.event.key == " ") {
+    //             is_playing = !is_playing;
+    //         }
+    //     }
+    // });
 
     // Render every frame
     var startTime = Date.now();
