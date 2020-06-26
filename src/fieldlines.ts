@@ -79,7 +79,7 @@ var n_prev: int = n_current;
 var is_playing: boolean = false;
 
 for (var n = 0; n <= n_max - n_init; n++) {
-    lines.push([]);
+    // lines.push([]);
     buffers.push([]);
 }
 
@@ -137,6 +137,28 @@ function enable_lines(n: int, n_prev: int) {
     });
 }
 
+var linetask = assetsManager.addTextFileTask("lines", "fieldlines/10.0/200");
+linetask.onSuccess = function(task) {
+    // console.log(task.text);
+	var response = JSON.parse(task.text);
+    // console.log("response is", response);
+    for (var i = 0; i < response.length; i++) {
+        buffers[0].push(response[i].map((v: Array<number>) => new Vector3(v[0], v[1], v[2])));
+    }
+    console.log(buffers[0]);
+    line_meshes = LinesBuilder.CreateLineSystem("fieldlines", {
+        lines: buffers[0],
+        useVertexAlpha: false,
+    }, scene);
+    // line_meshes = LinesBuilder.CreateLines("fieldlines", {
+    //     points: buffers[0][0],
+    // }, scene);
+    line_meshes.color = new Color3(0, 1, 0);
+
+    // line_meshes.enableEdgesRendering();
+	// line_meshes.edgesWidth = 20.0;
+	// line_meshes.edgesColor = new Color4(0, 1, 0, 1);
+}
 // for (var n = 0; n < 6; n++) {
 //     for (var j = n_init; j <= n_max; j++) {
 //         var linetask = assetsManager.addBinaryFileTask("loadLine" + n + "_" + (j * 500),
@@ -179,21 +201,14 @@ function show_prev_frame() {
 
 assetsManager.onFinish = function(tasks) {
     // update_lines(n_init);
-    // var gl = new GlowLayer("glow", scene);
-    // gl.intensity = 1.5;
-    // gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
-    //     // lines.forEach((line_set) => {
-    //     //     line_set.forEach((line) => {
-    //     //         if (mesh == line) {
-    //     //             result.set(0, 1, 0, 0.5);
-    //     //         }
-    //     //     });
-    //     // });
-    //     if (mesh == line_meshes)
-    //         result.set(0, 1, 0, 0.5);
-    //     if (mesh == star)
-    //         result.set(0, 0, 0, 1);
-    // }
+    var gl = new GlowLayer("glow", scene);
+    gl.intensity = 0.5;
+    gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
+        if (mesh == line_meshes)
+            result.set(0, 1, 0, 0.5);
+        if (mesh == star)
+            result.set(0, 0, 0, 1);
+    }
 
     var st = new Stats();
     st.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -221,7 +236,7 @@ assetsManager.onFinish = function(tasks) {
             var currentTime = Date.now();
             var timeDiff = currentTime - startTime;
             if (timeDiff > 40) {
-                show_next_frame();
+                // show_next_frame();
                 startTime = currentTime;
             }
         }

@@ -58,16 +58,16 @@ def integrate_fields_sphere(r_seed, n_samples, data):
     def end_box(x, y):
         r = np.sqrt(sum(y*y))
         dist = np.max(abs(y))
-        return r < 1.0 or dist > box_size
+        return r < 1.0 or dist > box_size-1.0
 
     lines = []
     for p in p_seed:
-        xs, ys = Euler_integrate(0.0, p, 0.05, data_b.value, end_box, 1000)
-        xs2, ys2 = Euler_integrate(0.0, p, 0.05, data_b.value_neg, end_box, 1000)
+        xs, ys = Euler_integrate(0.0, p, 0.05, data_b.value, end_box, 5000)
+        xs2, ys2 = Euler_integrate(0.0, p, 0.05, data_b.value_neg, end_box, 5000)
         if len(ys) > 100:
-            lines.append(np.concatenate((ys, ys2[::-1]))[::10])
-        elif len(ys) > 20:
-            lines.append(np.concatenate((ys, ys2[::-1]))[::4])
+            lines.append(np.concatenate((ys[:0:-1], ys2))[::10])
+        elif len(ys) > 30:
+            lines.append(np.concatenate((ys[:0:-1], ys2))[::5])
         else:
-            lines.append(np.concatenate((ys, ys2[::-1])))
+            lines.append(np.concatenate((ys[:0:-1], ys2)))
     return lines
