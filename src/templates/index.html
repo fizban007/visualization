@@ -23,9 +23,14 @@
              font-size: 0;
          }
         </style>
+        <!-- <script lang="ts">
+             var data_path = {{ data_path }}
+             </script> -->
     </head>
 
     <body>
+        <span style="display:none" id="dataPath">{{ data_path }}</span>
+
         <canvas id="renderCanvas" touch-action="none"></canvas>
 
         <script src="fieldlines.bundle.js"></script>

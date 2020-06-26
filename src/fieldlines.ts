@@ -44,6 +44,7 @@ camera.attachControl(canvas, true);
 camera.lowerRadiusLimit = 1;
 camera.upperRadiusLimit = 100;
 camera.wheelPrecision = 10.0;
+camera.inputs.remove(camera.inputs.attached.keyboard);
 
 // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
 var light = new HemisphericLight("light1", new Vector3(0, 1, 0), scene);
@@ -68,146 +69,94 @@ star.material = material;
 var assetsManager = new AssetsManager(scene);
 assetsManager.useDefaultLoadingScreen = true;
 
-var lines: LinesMesh[][] = [];
-var line_meshes: LinesMesh;
+var is_loaded: boolean[] = [];
+var lines: LinesMesh[] = [];
 var buffers: Vector3[][][] = [];
 
-var n_init: int = 100;
-var n_max: int = 400;
-var n_current: int = n_init;
-var n_prev: int = n_current;
-var is_playing: boolean = false;
+var data_path = document.getElementById("dataPath")!.innerText;
+console.log("path is", data_path);
+var load_data_task = assetsManager.addTextFileTask("data", "load_cart/\"" + data_path + "\"");
+load_data_task.onSuccess = function(task) {
+    var response = JSON.parse(task.text);
+    console.log("steps are", response);
 
-for (var n = 0; n <= n_max - n_init; n++) {
-    // lines.push([]);
-    buffers.push([]);
-}
+    var n_init: int = response[0];
+    var n_max: int = response[response.length - 1];
+    var n_current: int = n_init;
+    var n_prev: int = n_current;
+    var is_playing: boolean = false;
 
-function create_line_buffer(j: int, n: int, lines: LinesMesh[][]) {
-    return function(task: BinaryFileAssetTask) {
-        var floatView = new Float32Array(task.data);
-        var vertices: Vector3[] = [];
-        for (var i = 0; i < floatView.length / 3; i++) {
-            vertices.push(new Vector3(floatView[i * 3 + 1],
-                floatView[i * 3 + 2],
-                floatView[i * 3]));
-        }
-        buffers[j - n_init].push(vertices);
+    for (var n = 0; n <= n_max - n_init; n++) {
+        is_loaded.push(false);
+        lines.push(LinesBuilder.CreateLineSystem("fieldlines" + n, {
+            lines: [],
+        }, scene));
+        buffers.push([]);
     }
-}
 
-function update_lines(n: int) {
-    scene.removeMesh(line_meshes);
-    line_meshes = LinesBuilder.CreateLineSystem("fieldlines", {
-        lines: buffers[n - n_init],
-        useVertexAlpha: false,
-    }, scene);
-}
-
-function create_lines(j: int, n: int, lines: LinesMesh[][]) {
-    return function(task: BinaryFileAssetTask) {
-        var floatView = new Float32Array(task.data);
-        var vertices: Vector3[] = [];
-        var colors: Color4[] = [];
-        for (var i = 0; i < floatView.length / 3; i++) {
-            vertices.push(new Vector3(floatView[i * 3 + 1],
-                floatView[i * 3 + 2],
-                floatView[i * 3]));
-            colors.push(new Color4(0, 1, 0, 1));
+    function enable_lines(n: int, n_prev: int) {
+        if (is_loaded[n_prev - n_init]) {
+            lines[n_prev - n_init].setEnabled(false);
         }
-        // console.log(n, j, "loading finished");
-        var l = LinesBuilder.CreateLines("fieldline_" + j + "_" + n, {
-            points: vertices,
-            useVertexAlpha: false,
-            colors: colors,
-        }, scene);
-        if (j != n_init) {
-            l.setEnabled(false);
+        if (is_loaded[n - n_init]) {
+            lines[n - n_init].setEnabled(true);
+        } else {
+            load_line_data(n);
         }
-        lines[j - n_init].push(l);
     }
-}
 
-function enable_lines(n: int, n_prev: int) {
-    lines[n_prev - n_init].forEach((line) => {
-        line.setEnabled(false);
-    });
-    lines[n - n_init].forEach((line) => {
-        line.setEnabled(true);
-    });
-}
-
-var linetask = assetsManager.addTextFileTask("lines", "fieldlines/10.0/200");
-linetask.onSuccess = function(task) {
-    // console.log(task.text);
-	var response = JSON.parse(task.text);
-    // console.log("response is", response);
-    for (var i = 0; i < response.length; i++) {
-        buffers[0].push(response[i].map((v: Array<number>) => new Vector3(v[0], v[1], v[2])));
+    function load_line_data(n: int) {
+        if (buffers[n - n_init].length === 0) {
+            // var linetask = assetsManager.addTextFileTask("lines", "fieldlines/10.0/200");
+            // linetask.onSuccess = function(task) {
+            console.log("loading", "fieldlines/" + n + "/10.0/100");
+            fetch("fieldlines/" + n + "/10.0/200")
+                .then(response => response.json())
+                .then(data => {
+                    // console.log(task.text);
+	                // var response = JSON.parse(task.text);
+                    console.log("response is", response);
+                    for (var i = 0; i < data.length; i++) {
+                        buffers[n - n_init].push(data[i].map((v: Array<number>) => new Vector3(v[0], v[1], v[2])));
+                    }
+                    lines[n - n_init] = LinesBuilder.CreateLineSystem("fieldlines" + n, {
+                        lines: buffers[n - n_init],
+                        useVertexAlpha: false,
+                    }, scene);
+                    lines[n - n_init].color = new Color3(0, 1, 0);
+                    lines[n - n_init].setEnabled(true);
+                    is_loaded[n - n_init] = true;
+                });
+        }
     }
-    console.log(buffers[0]);
-    line_meshes = LinesBuilder.CreateLineSystem("fieldlines", {
-        lines: buffers[0],
-        useVertexAlpha: false,
-    }, scene);
-    // line_meshes = LinesBuilder.CreateLines("fieldlines", {
-    //     points: buffers[0][0],
-    // }, scene);
-    line_meshes.color = new Color3(0, 1, 0);
 
-    // line_meshes.enableEdgesRendering();
-	// line_meshes.edgesWidth = 20.0;
-	// line_meshes.edgesColor = new Color4(0, 1, 0, 1);
-}
-// for (var n = 0; n < 6; n++) {
-//     for (var j = n_init; j <= n_max; j++) {
-//         var linetask = assetsManager.addBinaryFileTask("loadLine" + n + "_" + (j * 500),
-//             "data/line_" + n + "_" + ("000000" + j * 500).slice(-6));
-//         // linetask.onSuccess = create_lines(j, n, lines);
-//         linetask.onSuccess = create_line_buffer(j, n, lines);
-//     }
-// }
-// function create_load_task(n: int, num_line: int) {
-//     var linetask = assetsManager.addBinaryFileTask("loadLine" + num_line + "_" + (n * 500),
-//         "data/line_" + num_line + "_" + ("000000" + n * 500).slice(-6));
-//     linetask.onSuccess = function() {
-//         console.log("Finished loading ", n, num_line);
-//         create_lines(n, num_line, lines);
-//         if (n < n_max) {
-//             create_load_task(n + 1, num_line);
-//         }
-//     }
-// }
+    load_line_data(n_init);
 
-// for (var n = 0; n < 6; n++) {
-//     create_load_task(n_init, n);
-// }
+    function show_next_frame() {
+        n_prev = n_current;
+        n_current += 1;
+        if (n_current > n_max) n_current = n_init;
+        enable_lines(n_current, n_prev);
+        // update_lines(n_current);
+    }
 
-function show_next_frame() {
-    n_prev = n_current;
-    n_current += 1;
-    if (n_current > n_max) n_current = n_init;
-    // enable_lines(n_current, n_prev);
-    update_lines(n_current);
-}
+    function show_prev_frame() {
+        n_prev = n_current;
+        n_current -= 1;
+        if (n_current < n_init) n_current = n_max;
+        enable_lines(n_current, n_prev);
+        // update_lines(n_current);
+    }
 
-function show_prev_frame() {
-    n_prev = n_current;
-    n_current -= 1;
-    if (n_current < n_init) n_current = n_max;
-    // enable_lines(n_current, n_prev);
-    update_lines(n_current);
-}
-
-assetsManager.onFinish = function(tasks) {
-    // update_lines(n_init);
+    // assetsManager.onFinish = function(tasks) {
+        // update_lines(n_init);
     var gl = new GlowLayer("glow", scene);
     gl.intensity = 0.5;
     gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
-        if (mesh == line_meshes)
-            result.set(0, 1, 0, 0.5);
         if (mesh == star)
             result.set(0, 0, 0, 1);
+        else
+            result.set(0, 1, 0, 0.5);
     }
 
     var st = new Stats();
@@ -215,17 +164,17 @@ assetsManager.onFinish = function(tasks) {
     document.body.appendChild(st.dom);
 
     // Add keypress events
-    // scene.onKeyboardObservable.add((kbInfo) => {
-    //     if (kbInfo.type == KeyboardEventTypes.KEYUP) {
-    //         if (kbInfo.event.key == "ArrowRight") {
-    //             show_next_frame();
-    //         } else if (kbInfo.event.key == "ArrowLeft") {
-    //             show_prev_frame();
-    //         } else if (kbInfo.event.key == " ") {
-    //             is_playing = !is_playing;
-    //         }
-    //     }
-    // });
+    scene.onKeyboardObservable.add((kbInfo) => {
+        if (kbInfo.type == KeyboardEventTypes.KEYUP) {
+            if (kbInfo.event.key == "ArrowRight") {
+                show_next_frame();
+            } else if (kbInfo.event.key == "ArrowLeft") {
+                show_prev_frame();
+            } else if (kbInfo.event.key == " ") {
+                is_playing = !is_playing;
+            }
+        }
+    });
 
     // Render every frame
     var startTime = Date.now();
@@ -243,6 +192,8 @@ assetsManager.onFinish = function(tasks) {
         scene.render();
         st.end();
     });
+    // }
+    // console.log(assetsManager.)
 }
-// console.log(assetsManager.)
+
 assetsManager.loadAsync();

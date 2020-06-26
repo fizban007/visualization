@@ -48,7 +48,7 @@ def load_sph_data(data_path):
     hex_dig = hashlib.md5(data_path.encode()).hexdigest()
     my_data = dl_sph.Data(data_path)
     # print(hex_dig)
-    return compress_response(my_data._conf)
+    return compress_response(my_data.fld_steps)
 
 @app.route('/load_cart/<path:data_path>')
 def load_cart_data(data_path):
@@ -57,12 +57,18 @@ def load_cart_data(data_path):
     hex_dig = hashlib.md5(data_path.encode()).hexdigest()
     my_data = dl.Data(data_path)
     # print(hex_dig)
-    return compress_response(my_data._conf)
+    return compress_response(my_data.fld_steps)
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', data_path="/home/alex/storage/Data/pulsar3d/dipole_60_paper")
+
+@app.route('/path/<path:data_path>')
+def load_path(data_path):
+    data_path = data_path.strip('"')
+    return render_template('index.html', data_path=data_path)
+
 
 @app.route('/data/<filename>')
 def get_data(filename):
@@ -71,9 +77,10 @@ def get_data(filename):
         return send_file(io.BytesIO(f.read()),
                          mimetype = "application/binary")
 
-@app.route('/fieldlines/<float:r_seed>/<int:num_seeds>')
-def get_fieldlines(r_seed, num_seeds):
+@app.route('/fieldlines/<int:step>/<float:r_seed>/<int:num_seeds>')
+def get_fieldlines(step, r_seed, num_seeds):
     global my_data
+    my_data.load(step)
     # If data is not loaded then don't do anything
     if my_data is None:
         return compress_response(np.array([1,2,3,4,5]))
