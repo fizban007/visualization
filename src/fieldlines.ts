@@ -42,7 +42,7 @@ camera.attachControl(canvas, true);
 
 // camera.allowUpsideDown = false;
 camera.lowerRadiusLimit = 1;
-camera.upperRadiusLimit = 100;
+camera.upperRadiusLimit = 200;
 camera.wheelPrecision = 10.0;
 camera.inputs.remove(camera.inputs.attached.keyboard);
 
@@ -124,7 +124,7 @@ load_data_task.onSuccess = function(task) {
                         useVertexAlpha: false,
                     }, scene);
                     lines[n - n_init].color = new Color3(0, 1, 0);
-                    lines[n - n_init].setEnabled(true);
+                    lines[n - n_init].setEnabled(n === n_current);
                     is_loaded[n - n_init] = true;
                 });
         }

@@ -6,11 +6,11 @@ import sys
 import gzip
 import json
 import numpy as np
-sys.path.append("/home/alex/Projects/CoffeeGPU/python/")
+# sys.path.append("/home/alex/Projects/CoffeeGPU/python/")
 # sys.path.append("/home/alex/Projects/Aperture4/python/")
 # from datalib, datalib_logsph import Data
-import datalib as dl
-import datalib_logsph as dl_sph
+import app.datalib as dl
+# import datalib_logsph as dl_sph
 from app.integrate import integrate_fields_sphere
 
 my_data = None
@@ -41,14 +41,14 @@ def compress_response(data):
     response.headers['Content-Encoding'] = 'gzip'
     return response
 
-@app.route('/load_sph/<path:data_path>')
-def load_sph_data(data_path):
-    global my_data
-    data_path = data_path.strip('"')
-    hex_dig = hashlib.md5(data_path.encode()).hexdigest()
-    my_data = dl_sph.Data(data_path)
-    # print(hex_dig)
-    return compress_response(my_data.fld_steps)
+# @app.route('/load_sph/<path:data_path>')
+# def load_sph_data(data_path):
+#     global my_data
+#     data_path = data_path.strip('"')
+#     hex_dig = hashlib.md5(data_path.encode()).hexdigest()
+#     my_data = dl_sph.Data(data_path)
+#     # print(hex_dig)
+#     return compress_response(my_data.fld_steps)
 
 @app.route('/load_cart/<path:data_path>')
 def load_cart_data(data_path):
