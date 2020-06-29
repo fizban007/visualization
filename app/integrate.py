@@ -146,7 +146,7 @@ def integrate_fields_with_seeds(p_seeds, data):
             lines.append(np.concatenate((ys[:0:-1], ys2))[::2])
         else:
             lines.append(np.concatenate((ys[:0:-1], ys2)))
-    return lines
+    return np.array(lines)
 
 def integrate_fields(seed_config, data):
     h = hash_config(seed_config)
@@ -159,6 +159,6 @@ def integrate_fields(seed_config, data):
         return lines
     else:
         seeds = gen_seed_points(seed_config)
-        lines = np.array(integrate_fields_with_seeds(seeds, data))
+        lines = integrate_fields_with_seeds(seeds, data)
         np.save(cache_file, lines)
         return lines
