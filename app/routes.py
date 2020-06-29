@@ -6,12 +6,8 @@ import sys
 import gzip
 import json
 import numpy as np
-# sys.path.append("/home/alex/Projects/CoffeeGPU/python/")
-# sys.path.append("/home/alex/Projects/Aperture4/python/")
-# from datalib, datalib_logsph import Data
 import app.datalib as dl
-# import datalib_logsph as dl_sph
-from app.integrate import integrate_fields_sphere
+from app.integrate import integrate_fields, gen_seed_points
 
 my_data = None
 
@@ -59,23 +55,16 @@ def load_cart_data(data_path):
     # print(hex_dig)
     return compress_response(my_data.fld_steps)
 
-@app.route('/')
-@app.route('/index')
-def index():
-    return render_template('index.html', data_path="/home/alex/storage/Data/pulsar3d/dipole_60_paper")
-
 @app.route('/path/<path:data_path>')
 def load_path(data_path):
     data_path = data_path.strip('"')
     return render_template('index.html', data_path=data_path)
 
-
-@app.route('/data/<filename>')
-def get_data(filename):
-    print(filename)
-    with open('data/' + filename, 'rb') as f:
-        return send_file(io.BytesIO(f.read()),
-                         mimetype = "application/binary")
+@app.route('/')
+@app.route('/index')
+def index():
+    # return render_template('index.html', data_path="/home/alex/storage/Data/pulsar3d/dipole_60_paper")
+    return load_path("/home/alex/storage/Data/pulsar3d/dipole_60_paper")
 
 @app.route('/fieldlines/<int:step>/<float:r_seed>/<int:num_seeds>')
 def get_fieldlines(step, r_seed, num_seeds):
@@ -83,9 +72,10 @@ def get_fieldlines(step, r_seed, num_seeds):
     my_data.load(step)
     # If data is not loaded then don't do anything
     if my_data is None:
-        return compress_response(np.array([1,2,3,4,5]))
+        return compress_response([])
     else:
-        lines = integrate_fields_sphere(r_seed, num_seeds, my_data)
+        seeds = gen_seed_points(r_seed, num_seeds, [])
+        lines = integrate_fields(seeds, my_data)
         return compress_response(lines)
         # return
 

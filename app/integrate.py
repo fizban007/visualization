@@ -41,10 +41,7 @@ class Bf:
         return -self.value(x, y)
 
 
-def integrate_fields_sphere(r_seed, n_samples, data):
-    data_b = Bf(data)
-
-    p_seed = []
+def gen_seed_points(r_seed, n_samples, p_seeds):
     for n in range(n_samples):
         mu = np.random.random_sample() * 2.0 - 1.0
         th = np.arccos(mu)
@@ -52,7 +49,11 @@ def integrate_fields_sphere(r_seed, n_samples, data):
         p = r_seed * np.array([np.sin(th) * np.sin(ph),
                                np.sin(th) * np.cos(ph),
                                np.cos(th)])
-        p_seed.append(p)
+        p_seeds.append(p)
+
+def integrate_fields(p_seeds, data):
+    data_b = Bf(data)
+
     box_size = abs(max(data._conf['lower']))
 
     def end_box(x, y):
@@ -61,7 +62,7 @@ def integrate_fields_sphere(r_seed, n_samples, data):
         return r < 1.0 or dist > 0.9 * box_size
 
     lines = []
-    for p in p_seed:
+    for p in p_seeds:
         xs, ys = Euler_integrate(0.0, p, 0.1, data_b.value, end_box, 3000)
         xs2, ys2 = Euler_integrate(0.0, p, 0.1, data_b.value_neg, end_box, 3000)
         if len(ys) > 100:
