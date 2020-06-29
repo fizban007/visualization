@@ -115,6 +115,24 @@ def RK_integrate(x0, y0, h0, f, end_cond):
         num += 1
     return np.array(xs), np.array(ys)
 
+def RK4_integrate(x0, y0, h, f, end_cond, n_max=10000):
+    xs = [x0]
+    ys = [y0]
+    x = np.copy(x0)
+    y = np.copy(y0)
+    num = 0
+    while not end_cond(x, y) and num < n_max:
+        k1 = f(x, y)
+        k2 = f(x + 0.5 * h, y + 0.5 * h * k1)
+        k3 = f(x + 0.5 * h, y + 0.5 * h * k2)
+        k4 = f(x + h, y + h * k3)
+        y += (k1 + 2.0 * k2 + 2.0 * k3 + k4) * h / 6.0
+        x += h
+        xs.append(np.copy(x))
+        ys.append(np.copy(y))
+        num += 1
+    return np.array(xs), np.array(ys)
+
 def Euler_integrate(x0, y0, h, f, end_cond, n_max=10000):
     xs = [x0]
     ys = [y0]

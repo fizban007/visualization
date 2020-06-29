@@ -40,6 +40,51 @@ class Bf:
         return -self.value(x, y)
 
 
+def seed_plane_x(x, n_seeds, y_lims = (-1, 1), z_lims = (-1, 1)):
+    seeds = []
+    for n in range(n_seeds):
+        y = y_lims[0] + (y_lims[0] - y_lims[1]) * np.random.random_sample()
+        z = z_lims[0] + (z_lims[0] - z_lims[1]) * np.random.random_sample()
+        seeds.append(np.array([x, y, z]))
+    return seeds
+
+def seed_plane_y(y, n_seeds, z_lims = (-1, 1), x_lims = (-1, 1)):
+    seeds = []
+    for n in range(n_seeds):
+        x = x_lims[0] + (x_lims[0] - x_lims[1]) * np.random.random_sample()
+        z = z_lims[0] + (z_lims[0] - z_lims[1]) * np.random.random_sample()
+        seeds.append(np.array([x, y, z]))
+    return seeds
+
+def seed_plane_z(z, n_seeds, x_lims = (-1, 1), y_lims = (-1, 1)):
+    seeds = []
+    for n in range(n_seeds):
+        y = y_lims[0] + (y_lims[0] - y_lims[1]) * np.random.random_sample()
+        x = x_lims[0] + (x_lims[0] - x_lims[1]) * np.random.random_sample()
+        seeds.append(np.array([x, y, z]))
+    return seeds
+
+def seed_spherical(r, thetas, phis):
+    seeds = []
+    for th in thetas:
+        for ph in phis:
+            seeds.append(r * np.array([np.sin(th) * np.cos(ph),
+                                       np.sin(th) * np.sin(ph),
+                                       np.cos(th)]))
+    return seeds
+
+def seed_spherial_random(r, n_seeds):
+    seeds = []
+    for n in range(n_seeds):
+        mu = np.random.random_sample() * 2.0 - 1.0
+        th = np.arccos(mu)
+        ph = 2*np.pi*np.random.random_sample()
+        p = r * np.array([np.sin(th) * np.sin(ph),
+                          np.sin(th) * np.cos(ph),
+                          np.cos(th)])
+        seeds.append(p)
+    return seeds
+
 def gen_seed_points(r_seed, n_samples, p_seeds):
     for n in range(n_samples):
         mu = np.random.random_sample() * 2.0 - 1.0
@@ -62,14 +107,14 @@ def integrate_fields(p_seeds, data):
 
     lines = []
     for p in p_seeds:
-        xs, ys = Euler_integrate(0.0, p, 0.05, data_b.value, end_box, 3000)
+        xs, ys = Euler_integrate(0.0, p, 0.1, data_b.value, end_box, 3000)
         #xs, ys = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
-        xs2, ys2 = Euler_integrate(0.0, p, 0.05, data_b.value_neg, end_box, 3000)
+        xs2, ys2 = Euler_integrate(0.0, p, 0.1, data_b.value_neg, end_box, 3000)
         #xs2, ys2 = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
         if len(ys) > 100:
-            lines.append(np.concatenate((ys[:0:-1], ys2))[::10])
-        elif len(ys) > 30:
             lines.append(np.concatenate((ys[:0:-1], ys2))[::5])
+        elif len(ys) > 30:
+            lines.append(np.concatenate((ys[:0:-1], ys2))[::2])
         else:
             lines.append(np.concatenate((ys[:0:-1], ys2)))
     return lines

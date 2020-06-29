@@ -10,6 +10,7 @@ import app.datalib as dl
 from app.integrate import integrate_fields, gen_seed_points
 
 my_data = None
+my_seeds = []
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
