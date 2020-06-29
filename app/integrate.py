@@ -4,10 +4,9 @@ import math
 
 class Bf:
     def __init__(self, data):
-        B = np.sqrt(data.Bx * data.Bx + data.By * data.By + data.Bz * data.Bz)
-        self.Bx = data.Bx / B
-        self.By = data.By / B
-        self.Bz = data.Bz / B
+        self.Bx = data.Bx
+        self.By = data.By
+        self.Bz = data.Bz
         self.x0 = data._conf['lower'][0]
         self.y0 = data._conf['lower'][1]
         self.z0 = data._conf['lower'][2]
@@ -35,7 +34,7 @@ class Bf:
         B = np.array([self.interp(self.Bx, y[0], y[1], y[2]),
                       self.interp(self.By, y[0], y[1], y[2]),
                       self.interp(self.Bz, y[0], y[1], y[2])])
-        return B
+        return B / np.sqrt(sum(B * B))
 
     def value_neg(self, x, y):
         return -self.value(x, y)
