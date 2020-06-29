@@ -6,6 +6,7 @@ import json
 import base64
 import os.path as path
 import os
+import threading
 
 class Bf:
     def __init__(self, data):
@@ -146,17 +147,46 @@ def integrate_fields_with_seeds(p_seeds, data):
             lines.append(np.concatenate((ys[:0:-1], ys2)))
     return lines
 
-def integrate_fields(seed_config, data):
+def integrate_fields(seed_config, data, step):
     h = hash_config(seed_config)
     cache_path = path.join(data._path, "fieldlines")
-    if not path.exists(cache_path):
-        os.mkdir(cache_path)
-    cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{h}.npy")
-    if path.exists(cache_file):
-        lines = np.load(cache_file, allow_pickle=True)
-        return lines
+    if step not in data.fld_steps:
+        return
     else:
-        seeds = gen_seed_points(seed_config)
-        lines = integrate_fields_with_seeds(seeds, data)
-        np.save(cache_file, lines)
-        return lines
+        data.load_fld(step)
+        cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{h}.npy")
+        if not path.exists(cache_file):
+            seeds = gen_seed_points(seed_config)
+            lines = integrate_fields_with_seeds(seeds, data)
+            np.save(cache_file, lines)
+
+def get_fieldline(seed_config, data, step):
+    if data is None:
+        return []
+    else:
+        h = hash_config(seed_config)
+        cache_path = path.join(data._path, "fieldlines")
+        cache_file = path.join(cache_path, f"{step:05d}.{h}.npy")
+        if path.exists(cache_file):
+            lines = np.load(cache_file, allow_pickle=True)
+            return lines
+        else:
+            return []
+
+class IntegrationThread(threading.Thread):
+    def __init__(self, seed_config, data):
+        self.progress = 0.0
+        self.config = seed_config
+        self.data = data
+        super().__init__()
+
+    def run(self):
+        h = hash_config(self.config)
+        cache_path = path.join(self.data._path, "fieldlines")
+        if not path.exists(cache_path):
+            os.mkdir(cache_path)
+
+        for step in self.data.fld_steps:
+            integrate_fields(self.config, self.data, step)
+            self.progress += 100.0 / len(self.data.fld_steps)
+            print(self.progress)

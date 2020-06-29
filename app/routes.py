@@ -7,10 +7,17 @@ import gzip
 import json
 import numpy as np
 import app.datalib as dl
-from app.integrate import integrate_fields, gen_seed_points
+from app.integrate import get_fieldline, IntegrationThread
 
 my_data = None
-my_seeds = []
+my_thread = None
+r_seed = 10.0
+num_seeds = 200
+seed_config = {
+    "name": "spherical_random",
+    "r": r_seed,
+    "n_seeds": num_seeds
+}
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -36,10 +43,12 @@ def compress_response(data):
 
 @app.route('/load_cart/<path:data_path>')
 def load_cart_data(data_path):
-    global my_data
+    global my_data, my_thread, seed_config
     data_path = data_path.strip('"')
     hex_dig = hashlib.md5(data_path.encode()).hexdigest()
     my_data = dl.Data(data_path)
+    my_thread = IntegrationThread(seed_config, my_data)
+    my_thread.start()
     # print(hex_dig)
     return compress_response(my_data.fld_steps)
 
@@ -57,18 +66,13 @@ def index():
 
 @app.route('/fieldlines/<int:step>/<float:r_seed>/<int:num_seeds>')
 def get_fieldlines(step, r_seed, num_seeds):
-    global my_data
+    global my_data, seed_config
     # If data is not loaded then don't do anything
     if my_data is None:
         return compress_response([])
     else:
         my_data.load(step)
-        seed_config = {
-            "name": "spherical_random",
-            "r": r_seed,
-            "n_seeds": num_seeds
-        }
-        lines = integrate_fields(seed_config, my_data)
+        lines = get_fieldline(seed_config, my_data, step)
         return compress_response(lines)
         # return
 
@@ -79,3 +83,11 @@ def upload():
         return player_data
     else:
         return "Get method!"
+
+@app.route('/progress')
+def progress(thread_id):
+    global my_thread
+    if my_thread is None:
+        return -1.0
+    else:
+        return my_thread.progress
