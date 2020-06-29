@@ -117,7 +117,7 @@ load_data_task.onSuccess = function(task) {
 	                // var response = JSON.parse(task.text);
                     console.log("response is", response);
                     for (var i = 0; i < data.length; i++) {
-                        buffers[n - n_init].push(data[i].map((v: Array<number>) => new Vector3(v[0], v[1], v[2])));
+                        buffers[n - n_init].push(data[i].map((v: Array<number>) => new Vector3(v[1], v[2], v[0])));
                     }
                     lines[n - n_init] = LinesBuilder.CreateLineSystem("fieldlines" + n, {
                         lines: buffers[n - n_init],
