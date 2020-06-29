@@ -75,7 +75,7 @@ var buffers: Vector3[][][] = [];
 
 var data_path = document.getElementById("dataPath")!.innerText;
 console.log("path is", data_path);
-var load_data_task = assetsManager.addTextFileTask("data", "load_cart/\"" + data_path + "\"");
+var load_data_task = assetsManager.addTextFileTask("/data", "load_cart/\"" + data_path + "\"");
 load_data_task.onSuccess = function(task) {
     var response = JSON.parse(task.text);
     console.log("steps are", response);
@@ -110,7 +110,7 @@ load_data_task.onSuccess = function(task) {
             // var linetask = assetsManager.addTextFileTask("lines", "fieldlines/10.0/200");
             // linetask.onSuccess = function(task) {
             console.log("loading", "fieldlines/" + n + "/10.0/100");
-            fetch("fieldlines/" + n + "/10.0/200")
+            fetch("/fieldlines/" + n + "/10.0/200")
                 .then(response => response.json())
                 .then(data => {
                     // console.log(task.text);
