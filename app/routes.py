@@ -24,19 +24,6 @@ def compress_response(data):
     response.headers['Content-Encoding'] = 'gzip'
     return response
 
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
-
-def compress_response(data):
-    content = gzip.compress(json.dumps(data, cls=NumpyEncoder).encode('utf8'), 5)
-    response = make_response(content)
-    response.headers['Content-length'] = len(content)
-    response.headers['Content-Encoding'] = 'gzip'
-    return response
-
 # @app.route('/load_sph/<path:data_path>')
 # def load_sph_data(data_path):
 #     global my_data
