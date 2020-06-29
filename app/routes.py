@@ -71,18 +71,18 @@ def get_fieldlines(step, r_seed, num_seeds):
     if my_data is None:
         return compress_response([])
     else:
-        my_data.load(step)
         lines = get_fieldline(seed_config, my_data, step)
         return compress_response(lines)
         # return
 
-@app.route('/upload', methods = ['GET', 'POST'])
-def upload():
+@app.route('/config', methods = ['GET', 'POST'])
+def config():
+    global seed_config
     if request.method == 'POST':
-        player_data = request.json["data"]
-        return player_data
+        seed_config = request.json["config"]
+        return seed_config
     else:
-        return "Get method!"
+        return seed_config
 
 @app.route('/progress')
 def progress(thread_id):
