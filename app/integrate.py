@@ -1,4 +1,4 @@
-from app.rk_integrate import Euler_integrate, RK_integrate
+from app.rk_integrate import Euler_integrate, RK4_integrate
 import numpy as np
 import math
 import hashlib
@@ -136,17 +136,15 @@ def integrate_fields_with_seeds(p_seeds, data):
 
     lines = []
     for p in p_seeds:
-        xs, ys = Euler_integrate(0.0, p, 0.1, data_b.value, end_box, 3000)
-        #xs, ys = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
-        xs2, ys2 = Euler_integrate(0.0, p, 0.1, data_b.value_neg, end_box, 3000)
-        #xs2, ys2 = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
+        xs, ys = RK4_integrate(0.0, p, 0.1, data_b.value, end_box, 3000)
+        xs2, ys2 = RK4_integrate(0.0, p, 0.1, data_b.value_neg, end_box, 3000)
         if len(ys) > 100:
             lines.append(np.concatenate((ys[:0:-1], ys2))[::5])
         elif len(ys) > 30:
             lines.append(np.concatenate((ys[:0:-1], ys2))[::2])
         else:
             lines.append(np.concatenate((ys[:0:-1], ys2)))
-    return np.array(lines)
+    return lines
 
 def integrate_fields(seed_config, data):
     h = hash_config(seed_config)
@@ -155,7 +153,7 @@ def integrate_fields(seed_config, data):
         os.mkdir(cache_path)
     cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{h}.npy")
     if path.exists(cache_file):
-        lines = np.load(cache_file)
+        lines = np.load(cache_file, allow_pickle=True)
         return lines
     else:
         seeds = gen_seed_points(seed_config)
