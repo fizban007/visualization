@@ -63,10 +63,10 @@ def integrate_fields(p_seeds, data):
 
     lines = []
     for p in p_seeds:
-        # xs, ys = Euler_integrate(0.0, p, 0.1, data_b.value, end_box, 3000)
-        xs, ys = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
-        # xs2, ys2 = Euler_integrate(0.0, p, 0.1, data_b.value_neg, end_box, 3000)
-        xs2, ys2 = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
+        xs, ys = Euler_integrate(0.0, p, 0.05, data_b.value, end_box, 3000)
+        #xs, ys = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
+        xs2, ys2 = Euler_integrate(0.0, p, 0.05, data_b.value_neg, end_box, 3000)
+        #xs2, ys2 = RK_integrate(0.0, p, 0.5, data_b.value, end_box, 3000)
         if len(ys) > 100:
             lines.append(np.concatenate((ys[:0:-1], ys2))[::10])
         elif len(ys) > 30:

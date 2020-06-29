@@ -42,9 +42,10 @@ def load_cart_data(data_path):
     # print(hex_dig)
     return compress_response(my_data.fld_steps)
 
-@app.route('/path/<path:data_path>')
+@app.route('/data/<path:data_path>')
 def load_path(data_path):
     data_path = data_path.strip('"')
+    #return data_path
     return render_template('index.html', data_path=data_path)
 
 @app.route('/')
@@ -61,7 +62,8 @@ def get_fieldlines(step, r_seed, num_seeds):
     if my_data is None:
         return compress_response([])
     else:
-        seeds = gen_seed_points(r_seed, num_seeds, [])
+        seeds = []
+        gen_seed_points(r_seed, num_seeds, seeds)
         lines = integrate_fields(seeds, my_data)
         return compress_response(lines)
         # return
