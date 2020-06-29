@@ -1,6 +1,11 @@
 from app.rk_integrate import Euler_integrate, RK_integrate
 import numpy as np
 import math
+import hashlib
+import json
+import base64
+import os.path as path
+import os
 
 class Bf:
     def __init__(self, data):
@@ -73,7 +78,7 @@ def seed_spherical(r, thetas, phis):
                                        np.cos(th)]))
     return seeds
 
-def seed_spherial_random(r, n_seeds):
+def seed_spherical_random(r, n_seeds):
     seeds = []
     for n in range(n_seeds):
         mu = np.random.random_sample() * 2.0 - 1.0
@@ -85,17 +90,41 @@ def seed_spherial_random(r, n_seeds):
         seeds.append(p)
     return seeds
 
-def gen_seed_points(r_seed, n_samples, p_seeds):
-    for n in range(n_samples):
-        mu = np.random.random_sample() * 2.0 - 1.0
-        th = np.arccos(mu)
-        ph = 2*np.pi*np.random.random_sample()
-        p = r_seed * np.array([np.sin(th) * np.sin(ph),
-                               np.sin(th) * np.cos(ph),
-                               np.cos(th)])
-        p_seeds.append(p)
+def gen_seed_points(seed_config):
+    seeds = []
+    if isinstance(seed_config, list):
+        for c in seed_config:
+            seeds.extend(gen_seed_points(c))
+    else:
+        if seed_config["name"] == "spherical_random":
+            seeds.extend(seed_spherical_random(seed_config['r'],
+                                               seed_config['n_seeds']))
+        elif seed_config["name"] == "spherical":
+            seeds.extend(seed_spherical(seed_config['r'],
+                                        seed_config['thetas'],
+                                        seed_config['phis']))
+        elif seed_config["name"] == "plane_x":
+            seeds.extend(seed_plane_x(seed_config['x'],
+                                      seed_config['n_seeds'],
+                                      seed_config['y_lims'],
+                                      seed_config['z_lims']))
+        elif seed_config["name"] == "plane_y":
+            seeds.extend(seed_plane_x(seed_config['y'],
+                                      seed_config['n_seeds'],
+                                      seed_config['z_lims'],
+                                      seed_config['x_lims']))
+        elif seed_config["name"] == "plane_z":
+            seeds.extend(seed_plane_x(seed_config['z'],
+                                      seed_config['n_seeds'],
+                                      seed_config['x_lims'],
+                                      seed_config['y_lims']))
+    return seeds
 
-def integrate_fields(p_seeds, data):
+def hash_config(seed_config):
+    dig = hashlib.sha1(json.dumps(seed_config, sort_keys=True).encode('UTF-8')).digest()
+    return base64.urlsafe_b64encode(dig[:6]).decode('ascii')
+
+def integrate_fields_with_seeds(p_seeds, data):
     data_b = Bf(data)
 
     box_size = abs(max(data._conf['lower']))
@@ -118,3 +147,18 @@ def integrate_fields(p_seeds, data):
         else:
             lines.append(np.concatenate((ys[:0:-1], ys2)))
     return lines
+
+def integrate_fields(seed_config, data):
+    h = hash_config(seed_config)
+    cache_path = path.join(data._path, "fieldlines")
+    if not path.exists(cache_path):
+        os.mkdir(cache_path)
+    cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{h}.npy")
+    if path.exists(cache_file):
+        lines = np.load(cache_file)
+        return lines
+    else:
+        seeds = gen_seed_points(seed_config)
+        lines = np.array(integrate_fields_with_seeds(seeds, data))
+        np.save(cache_file, lines)
+        return lines

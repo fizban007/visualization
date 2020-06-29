@@ -9,7 +9,7 @@ import re
 
 class Data:
   def __init__(self, path=None):
-    if path is not None:
+   if path is not None:
       self.open_data(path)
 
   def __dir__(self):

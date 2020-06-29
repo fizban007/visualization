@@ -58,14 +58,17 @@ def index():
 @app.route('/fieldlines/<int:step>/<float:r_seed>/<int:num_seeds>')
 def get_fieldlines(step, r_seed, num_seeds):
     global my_data
-    my_data.load(step)
     # If data is not loaded then don't do anything
     if my_data is None:
         return compress_response([])
     else:
-        seeds = []
-        gen_seed_points(r_seed, num_seeds, seeds)
-        lines = integrate_fields(seeds, my_data)
+        my_data.load(step)
+        seed_config = {
+            "name": "spherical_random",
+            "r": r_seed,
+            "n_seeds": num_seeds
+        }
+        lines = integrate_fields(seed_config, my_data)
         return compress_response(lines)
         # return
 
