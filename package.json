@@ -1,6 +1,6 @@
 {
   "name": "visualization",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Visualizations of scientific data in modern web browsers",
   "main": "index.js",
   "scripts": {

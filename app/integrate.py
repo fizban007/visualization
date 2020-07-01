@@ -155,7 +155,7 @@ def integrate_fields(seed_config, data):
         os.mkdir(cache_path)
     cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{h}.npy")
     if path.exists(cache_file):
-        lines = np.load(cache_file)
+        lines = np.load(cache_file, allow_pickle=True)
         return lines
     else:
         seeds = gen_seed_points(seed_config)
