@@ -119,13 +119,15 @@ load_data_task.onSuccess = function(task) {
                     for (var i = 0; i < data.length; i++) {
                         buffers[n - n_init].push(data[i].map((v: Array<number>) => new Vector3(v[1], v[2], v[0])));
                     }
-                    lines[n - n_init] = LinesBuilder.CreateLineSystem("fieldlines" + n, {
-                        lines: buffers[n - n_init],
-                        useVertexAlpha: false,
-                    }, scene);
-                    lines[n - n_init].color = new Color3(0, 1, 0);
-                    lines[n - n_init].setEnabled(n === n_current);
-                    is_loaded[n - n_init] = true;
+                    if (buffers[n - n_init].length > 0) {
+                        lines[n - n_init] = LinesBuilder.CreateLineSystem("fieldlines" + n, {
+                            lines: buffers[n - n_init],
+                            useVertexAlpha: false,
+                        }, scene);
+                        lines[n - n_init].color = new Color3(0, 1, 0);
+                        lines[n - n_init].setEnabled(n === n_current);
+                        is_loaded[n - n_init] = true;
+                    }
                 });
         }
     }
