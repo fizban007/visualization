@@ -1,4 +1,3 @@
-from app.rk_integrate import Euler_integrate, RK4_integrate
 import numpy as np
 import math
 import hashlib
@@ -7,7 +6,8 @@ import base64
 import os.path as path
 import os
 import threading
-from datalib import Data
+from app.rk_integrate import Euler_integrate, RK4_integrate
+from app.datalib import Data
 
 
 class Bf:

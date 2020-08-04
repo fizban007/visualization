@@ -1,12 +1,12 @@
 from PIL import Image
-from datalib import Data
-import interp
 import math
 import numpy as np
 import io
 import threading
 import os
 import os.path as path
+from app.datalib import Data
+from app.interp import resample, is_power_of_two
 
 def halve_image(image):
     rows, cols, planes = image.shape
@@ -31,7 +31,7 @@ def mipmap(image):
 def resample_array(array, res):
     # FIXME: Here we assumed the array is 3D. Potential technical debt
     if array.shape[0] != res:
-        return interp.resample(array, (res, res, res))
+        return resample(array, (res, res, res))
     else:
         return array
 
@@ -67,7 +67,7 @@ def tile_size(res):
 
 def gen_tiled_png(arrays, max_vals, res=512):
     # Always change res to the closest power of 2
-    if not interp.is_power_of_two(res):
+    if not is_power_of_two(res):
         res = pow(2, int(math.log2(res) + 0.5))
 
     tile_x, tile_y = tile_size(res)
