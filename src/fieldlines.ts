@@ -194,8 +194,6 @@ load_data_task.onSuccess = function(task) {
         scene.render();
         st.end();
     });
-    // }
-    // console.log(assetsManager.)
 }
 
 assetsManager.loadAsync();

@@ -78,12 +78,13 @@ def gen_tiled_png(arrays, max_vals, res=512):
     if len(arrays) != len(max_vals):
         raise RuntimeError("The two input arrays should have matching lengths!")
     else:
-        img_width = tile_x * arrays[0].shape[2];
-        img_height = tile_y * arrays[0].shape[1];
+        img_width = tile_x * res;
+        img_height = tile_y * res;
         img = np.zeros((img_width, img_height))
         for i in range(len(arrays)):
-            img += (np.minimum(arrays[i]*256./max_vals[i], 255).astype('uint32') << (8 * i)).reshape(
-                tile_y, tile_x, arrays[0].shape[2], arrays[0].shape[1]).swapaxes(1, 2).reshape(img_width, img_height)
+            data = resample_array(arrays[i], res)
+            img += (np.minimum(data*256./max_vals[i], 255).astype('uint32') << (8 * i)).reshape(
+                tile_y, tile_x, res, res).swapaxes(1, 2).reshape(img_width, img_height)
         img = Image.frombytes('RGBA', img.shape, img)
         # img = mipmap(img)
         # img_io = io.BytesIO()
@@ -103,8 +104,10 @@ class VolumeThread(threading.Thread):
             os.mkdir(cache_path)
 
         for step in self.data.fld_steps:
-            self.data.load(step)
-            img = gen_tiled_png((self.data.J), (np.max(self.data.J)), self.res)
-            img.save(path.join(cache_path, f"{step:05d}.{self.res}.png"))
+            cache_file = path.join(cache_path, f"{step:05d}.{self.res}.png")
+            if not path.exists(cache_file):
+                self.data.load(step)
+                img = gen_tiled_png([self.data.J], [np.max(self.data.J)], self.res)
+                img.save(cache_file)
             self.progress += 100.0 / len(self.data.fld_steps)
             print(f"volume {step}/{len(self.data.fld_steps)}")

@@ -4,7 +4,9 @@ import hashlib
 import json
 import base64
 import os.path as path
+from pathlib import Path
 import os
+import glob
 import threading
 from app.rk_integrate import Euler_integrate, RK4_integrate
 from app.datalib import Data
@@ -203,6 +205,13 @@ def get_fieldline(seed_config, data_path, step):
     else:
         return []
 
+def remove_cache(data_path, seed_config=None):
+    cache_path = Path(data_path) / "fieldlines"
+    if seed_config is None:
+        for f in cache_path.glob("*.npy"):
+            f.unlink()
+    else:
+        pass
 
 class IntegrationThread(threading.Thread):
     def __init__(self, seed_config, data_path):

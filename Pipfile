@@ -11,6 +11,5 @@ numpy = "*"
 h5py = "*"
 toml = "*"
 python-dotenv = "*"
-
-[requires]
-python_version >= "3.7"
+pillow = "*"
+scipy = "*"
