@@ -6,10 +6,12 @@ import toml
 from pathlib import Path
 import os
 import re
+from PIL import Image
 
 class Data:
   def __init__(self, path=None):
-   if path is not None:
+    self._naming_scheme = "123"
+    if path is not None:
       self.open_data(path)
 
   def __dir__(self):
@@ -37,9 +39,20 @@ class Data:
 
   def __load_fld_quantity(self, key):
     path = os.path.join(self._path, f"fld.{self._current_fld_step:05d}.h5")
-    data = h5py.File(path, "r")
-    self.__dict__[key] = data[key][()]
-    data.close()
+    if key == "B":
+      if self._naming_scheme == "123":
+        self.__dict__[key] = np.sqrt(self.B1 * self.B1 + self.B2 * self.B2 + self.B3 * self.B3)
+      elif self._naming_scheme == "xyz":
+        self.__dict__[key] = np.sqrt(self.Bx * self.Bx + self.By * self.By + self.Bz * self.Bz)
+    elif key == "J":
+      if self._naming_scheme == "123":
+        self.__dict__[key] = np.sqrt(self.J1 * self.J1 + self.J2 * self.J2 + self.J3 * self.J3)
+      elif self._naming_scheme == "xyz":
+        self.__dict__[key] = np.sqrt(self.Jx * self.Jx + self.Jy * self.Jy + self.Jz * self.Jz)
+    else:
+      data = h5py.File(path, "r")
+      self.__dict__[key] = data[key][()]
+      data.close()
 
   def __load_ptc_quantity(self, key):
     pass
@@ -71,7 +84,11 @@ class Data:
         os.path.join(self._path, f"fld.{self._current_fld_step:05d}.h5"),
         "r",
       )
-      self._fld_keys = list(f_fld.keys()) + ["B", "J", "flux"]
+      self._fld_keys = list(f_fld.keys()) + ["B", "J"]
+      if all(item in f_fld.keys() for item in ["B1", "B2", "B3"]):
+        self._naming_scheme = "123"
+      elif all(item in f_fld.keys() for item in ["Bx", "By", "Bz"]):
+        self._naming_scheme = "xyz"
       f_fld.close()
 
     # generate a list of output steps for particles
@@ -124,3 +141,4 @@ class Data:
 
   def load_conf(self, path):
     return toml.load(path)
+

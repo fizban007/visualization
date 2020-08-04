@@ -11,7 +11,7 @@ import { GlowLayer } from "@babylonjs/core/Layers/glowLayer";
 
 // Load LoadingScreen for side effects
 import "@babylonjs/core/Loading/loadingScreen";
-import { AssetsManager, BinaryFileAssetTask } from "@babylonjs/core/Misc/assetsManager";
+import { AssetsManager } from "@babylonjs/core/Misc/assetsManager";
 import { LinesMesh } from "@babylonjs/core/Meshes/linesMesh";
 
 import Stats from "stats.js";
