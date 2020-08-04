@@ -178,19 +178,9 @@ def integrate_fields_with_seeds(p_seeds, data):
 
 
 def integrate_fields(seeds, config_hash, data, step):
-    cache_path = path.join(data._path, "fieldlines")
-    if not path.exists(cache_path):
-        os.mkdir(cache_path)
-    cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{config_hash}.npy")
-    if path.exists(cache_file):
-        lines = np.load(cache_file, allow_pickle=True)
-        return lines
-    else:
-        data.load_fld(step)
-        cache_file = path.join(cache_path, f"{data._current_fld_step:05d}.{config_hash}.npy")
-        if not path.exists(cache_file):
-            lines = np.array(integrate_fields_with_seeds(seeds, data), dtype=object)
-            np.save(cache_file, lines)
+    data.load_fld(step)
+    lines = np.array(integrate_fields_with_seeds(seeds, data), dtype=object)
+    return lines
 
 
 def get_fieldline(seed_config, data_path, step):
@@ -220,6 +210,9 @@ class IntegrationThread(threading.Thread):
         seeds = gen_seed_points(self.config)
 
         for step in self.data.fld_steps:
-            integrate_fields(seeds, conf_hash, self.data, step)
+            cache_file = path.join(cache_path, f"{step:05d}.{conf_hash}.npy")
+            if not path.exists(cache_file):
+                lines = integrate_fields(seeds, conf_hash, self.data, step)
+                np.save(cache_file, lines)
             self.progress += 100.0 / len(self.data.fld_steps)
             print(f"fieldlines {step}/{len(self.data.fld_steps)}")

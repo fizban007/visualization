@@ -7,7 +7,7 @@ import gzip
 import json
 import numpy as np
 import app.datalib as dl
-from app.integrate import get_fieldline, IntegrationThread
+from app.fieldlines import get_fieldline, IntegrationThread
 from app.gen_volume import VolumeThread
 
 # my_data = None
